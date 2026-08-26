@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% block title %}Tasks — To Do App{% endblock %}
+{% block content %}
+
+<style>
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .page-header h2 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #f0eeff;
+    }
+    .task-form {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+    .task-form input[type="text"] {
+        flex: 2;
+        min-width: 180px;
+        background: #1a1a22;
+        border: 1px solid #2e2e3e;
+        border-radius: 12px;
+        padding: 0.75rem 1.2rem;
+        color: #f0eeff;
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .task-form input[type="date"] {
+        flex: 1;
+        min-width: 140px;
+        background: #1a1a22;
+        border: 1px solid #2e2e3e;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        color: #f0eeff;
+        font-size: 0.9rem;
+        outline: none;
+        color-scheme: dark;
+    }
+    .task-form input:focus { border-color: #7c6af7; }
+    .task-form input::placeholder { color: #8885a0; }
+    .btn-add {
+        background: #7c6af7;
+        border: none;
+        border-radius: 12px;
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 0.75rem 1.5rem;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .btn-add:hover { background: #6b59e8; }
+    .btn-clear {
+        background: rgba(248,113,113,0.1);
+        border: 1px solid rgba(248,113,113,0.3);
+        border-radius: 10px;
+        color: #f87171;
+        font-size: 0.8rem;
+        font-weight: 500;
+        padding: 0.4rem 1rem;
+        cursor: pointer;
+    }
+    .task-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .task-card {
+        background: #1a1a22;
+        border: 1px solid #2e2e3e;
+        border-radius: 14px;
+        padding: 1rem 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    .task-card:hover { background: #22222e; }
+    .task-info { flex: 1; min-width: 150px; }
+    .task-num { font-size: 0.75rem; color: #8885a0; margin-bottom: 0.2rem; }
+    .task-title { font-size: 0.95rem; color: #f0eeff; font-weight: 500; margin-bottom: 0.4rem; }
+    .task-dates { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .date-tag { font-size: 0.75rem; color: #8885a0; }
+    .date-tag.due { color: #f76a8c; }
+    .task-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    .badge.pending { background: rgba(251,191,36,0.15); color: #fbbf24; }
+    .badge.working { background: rgba(96,165,250,0.15); color: #60a5fa; }
+    .badge.done    { background: rgba(74,222,128,0.15); color: #4ade80; }
+    .btn-next {
+        background: #22222e;
+        border: 1px solid #2e2e3e;
+        border-radius: 8px;
+        color: #8885a0;
+        font-size: 0.8rem;
+        padding: 0.35rem 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-next:hover { border-color: #7c6af7; color: #7c6af7; }
+    .btn-delete {
+        background: rgba(248,113,113,0.1);
+        border: 1px solid rgba(248,113,113,0.2);
+        border-radius: 8px;
+        color: #f87171;
+        font-size: 0.8rem;
+        padding: 0.35rem 0.8rem;
+        cursor: pointer;
+    }
+    .btn-history {
+        background: rgba(124,106,247,0.1);
+        border: 1px solid rgba(124,106,247,0.2);
+        border-radius: 8px;
+        color: #7c6af7;
+        font-size: 0.8rem;
+        padding: 0.35rem 0.8rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-history:hover { background: rgba(124,106,247,0.2); }
+    .empty-state { text-align: center; padding: 4rem 2rem; color: #8885a0; }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    @media (max-width: 480px) {
+        .page-header h2 { font-size: 1.3rem; }
+        .task-card { padding: 0.85rem 1rem; }
+    }
+</style>
+
+<div class="page-header">
+    <h2>Your Tasks</h2>
+    {% if tasks %}
+    <form method="post" action="{{ url_for('task.clear_tasks') }}">
+        <button type="submit" class="btn-clear">Clear All</button>
+    </form>
+    {% endif %}
+</div>
+
+<form action="{{ url_for('task.add_task') }}" method="post" class="task-form">
+    <input type="text" name="title" placeholder="Add a new task..." required>
+    <input type="date" name="due_date">
+    <button type="submit" class="btn-add">+ Add</button>
+</form>
+
+{% if tasks %}
+<div class="task-list">
+    {% for task in tasks %}
+    <div class="task-card">
+        <div class="task-info">
+            <div class="task-num">#{{ loop.index }}</div>
+            <div class="task-title">{{ task.title }}</div>
+            <div class="task-dates">
+                <span class="date-tag">📅 {{ task.created_at.strftime('%d %b %Y') }}</span>
+                {% if task.due_date %}
+                <span class="date-tag due">⏰ Due: {{ task.due_date }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="task-actions">
+            <span class="badge {{ task.status|lower }}">{{ task.status }}</span>
+            <form action="{{ url_for('task.toggle_status', task_id=task.id) }}" method="post">
+                <button class="btn-next" type="submit">Next →</button>
+            </form>
+            <a href="{{ url_for('task.task_history', task_id=task.id) }}" class="btn-history">📋 History</a>
+            <form action="{{ url_for('task.delete_task', task_id=task.id) }}" method="post">
+                <button class="btn-delete" type="submit">🗑️</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="icon">📋</div>
+    <p>No tasks yet. Add one above!</p>
+</div>
+{% endif %}
+
+{% endblock %}

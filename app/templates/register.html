@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Register — To Do App{% endblock %}
+{% block content %}
+
+<style>
+    .register-wrap {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .register-box {
+        background: #1a1a22;
+        border: 1px solid #2e2e3e;
+        border-radius: 20px;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 420px;
+    }
+    .register-box h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.4rem;
+        color: #f0eeff;
+    }
+    .register-box p { color: #8885a0; font-size: 0.875rem; margin-bottom: 2rem; }
+    .form-group { margin-bottom: 1.2rem; }
+    .form-group label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #8885a0;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .form-group input {
+        width: 100%;
+        background: #0f0f13;
+        border: 1px solid #2e2e3e;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        color: #f0eeff;
+        font-size: 0.9rem;
+        transition: border-color 0.2s;
+        outline: none;
+    }
+    .form-group input:focus { border-color: #7c6af7; }
+    .btn-register {
+        width: 100%;
+        padding: 0.85rem;
+        background: linear-gradient(135deg, #7c6af7, #f76a8c);
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 0.5rem;
+        transition: opacity 0.2s;
+    }
+    .btn-register:hover { opacity: 0.9; }
+    .login-link {
+        text-align: center;
+        margin-top: 1.2rem;
+        font-size: 0.875rem;
+        color: #8885a0;
+    }
+    .login-link a { color: #7c6af7; text-decoration: none; }
+</style>
+
+<div class="register-wrap">
+    <div class="register-box">
+        <h2>Create Account</h2>
+        <p>Register karo aur tasks manage karo</p>
+        <form method="post">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" placeholder="Enter username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" placeholder="Enter password" required>
+            </div>
+            <button type="submit" class="btn-register">Register →</button>
+        </form>
+        <div class="login-link">
+            Already have account? <a href="{{ url_for('auth.login') }}">Login</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
